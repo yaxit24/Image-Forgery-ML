@@ -9,13 +9,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.preprocessing import StandardScaler
 
-DATA_DIR = "data/train"   # must contain subfolders 'authentic' and 'forged'
+DATA_DIR = "data/train"   # data has subfolders 'authentic' and 'forged'
 MODEL_PATH = "forensics_model.pkl"
 SCALER_PATH = "forensics_scaler.pkl"
 
 def gather_examples():
-    X = []
-    y = []
+    X = [] #feature vectors
+    y = [] #lables 0-> forged 1-> authentic here.
     for label_name in ["authentic", "forged"]:
         lab = 0 if label_name == "authentic" else 1
         folder = os.path.join(DATA_DIR, label_name)
@@ -28,7 +28,7 @@ def gather_examples():
             except Exception as e:
                 print("skip", path, e)
                 continue
-            # run detectors
+            # run detectors 
             ela_img, ela_stats = compute_ela(pil)
             res_map, res_stats = extract_residual(arr)
             # ensure grayscale for blockiness
