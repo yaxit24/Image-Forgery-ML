@@ -30,11 +30,11 @@ from skimage.restoration import denoise_wavelet
 import numpy as np
 
 def extract_residual(arr_rgb):
-    img = arr_rgb.astype('float32') / 255.0
+    img = arr_rgb.astype('float32') / 255.0   # convert to floating point 0-1. fromt he array.
 
     den = denoise_wavelet(
         img,
-        channel_axis=-1,   # updated for new skimage
+        channel_axis=-1,    #coclor channel axis like for [224, 224, 3] where 3 is coloe channle axis here.
         convert2ycbcr=False,
         rescale_sigma=True
     )
@@ -77,7 +77,7 @@ from sklearn.cluster import DBSCAN
 def copy_move_orb_mask(rgb_arr):
     gray = cv2.cvtColor(rgb_arr, cv2.COLOR_RGB2GRAY)
 
-    orb = cv2.ORB_create(nfeatures=1500)
+    orb = cv2.ORB_create(nfeatures=1500) #ORB = Oriented FAST and Rotated BRIEF    === It detects: 1) Corners  2) Edges 3)Texture-rich points
     kps, desc = orb.detectAndCompute(gray, None)
 
     h, w = gray.shape
@@ -96,14 +96,14 @@ def copy_move_orb_mask(rgb_arr):
     good_matches = []
 
     for m, n in matches:
-        if m.trainIdx == m.queryIdx:
+        if m.trainIdx == m.queryIdx: #Prevents matching a keypoint to itself.
             continue
-        if m.distance < 0.75 * n.distance:
+        if m.distance < 0.75 * n.distance: #Lowe’s ratio test.  we accept only if Best is much better than second best
             pt1 = kps[m.queryIdx].pt
             pt2 = kps[m.trainIdx].pt
 
             # avoid matching same region
-            if np.linalg.norm(np.array(pt1) - np.array(pt2)) > 10:
+            if np.linalg.norm(np.array(pt1) - np.array(pt2)) > 10: #Avoid nearby natches
                 good_matches.append(pt1)
 
     if len(good_matches) < 8:
@@ -115,7 +115,7 @@ def copy_move_orb_mask(rgb_arr):
 
     pts = np.array(good_matches)
 
-    clustering = DBSCAN(eps=20, min_samples=3).fit(pts)
+    clustering = DBSCAN(eps=20, min_samples=3).fit(pts) # to find Groups of matches forming duplicated regions.
     labels = clustering.labels_
 
     clusters = 0
@@ -128,7 +128,8 @@ def copy_move_orb_mask(rgb_arr):
         cluster_pts = pts[labels == lbl].astype(int)
 
         x, y, wc, hc = cv2.boundingRect(cluster_pts)
-        mask[y:y+hc, x:x+wc] = 255
+        mask[y:y+hc, x:x+wc] = 255   #Compute bounding rectangle 
+                                    #Mark region white (255) in mask    == So final mask: Black = normal area , White = suspicious duplicated region
 
     stats = {
         "n_keypoints": len(kps),
@@ -137,8 +138,6 @@ def copy_move_orb_mask(rgb_arr):
     }
 
     return mask, stats
-    # BFMatcher + knnMatch, ratio test, remove self-matches, cluster source pts
-    # produce mask (HxW uint8 0/255)
-    # (See detailed implementation in detectors.py)
+
     
     
