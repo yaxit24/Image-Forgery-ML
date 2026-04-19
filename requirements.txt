@@ -1,0 +1,11 @@
+streamlit>=1.30.0
+numpy
+opencv-python-headless
+Pillow
+scikit-image
+scikit-learn
+joblib
+torch
+torchvision
+groq
+fpdf2

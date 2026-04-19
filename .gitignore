@@ -1,0 +1,23 @@
+# Environment / secrets
+.env
+*.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Data (too large for git — keep locally)
+# data/train/
+
+# Gemini
+.gemini/
